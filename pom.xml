@@ -16,6 +16,16 @@
     <properties>
         <java.version>15</java.version>
     </properties>
+    <repositories>
+        <repository>
+            <id>central</id>
+            <url>https://repo1.maven.org/maven2/</url>
+        </repository>
+        <repository>
+            <id>github-shared</id>
+            <url>https://robert-maes:94176f53cd8d2c73675b3c8b9de62e50b9a984b8@maven.pkg.github.com/Java-Feb-CRAM/shared</url>
+        </repository>
+    </repositories>
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -46,6 +56,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.smoothstack.utopia</groupId>
+            <artifactId>shared</artifactId>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
