@@ -23,7 +23,7 @@
         </repository>
         <repository>
             <id>github-shared</id>
-            <url>https://robert-maes:94176f53cd8d2c73675b3c8b9de62e50b9a984b8@maven.pkg.github.com/Java-Feb-CRAM/shared</url>
+            <url>https://maven.pkg.github.com/Java-Feb-CRAM/shared</url>
         </repository>
     </repositories>
     <dependencies>
