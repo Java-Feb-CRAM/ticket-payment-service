@@ -5,12 +5,11 @@ import com.smoothstack.utopia.ticketpaymentservice.dao.BookingDao;
 import com.smoothstack.utopia.ticketpaymentservice.dto.CreateBookingDto;
 import com.smoothstack.utopia.ticketpaymentservice.dto.UpdateBookingDto;
 import com.smoothstack.utopia.ticketpaymentservice.exception.BookingNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
+import javax.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * @author Rob Maes
@@ -18,6 +17,7 @@ import java.util.Optional;
  */
 @Service
 public class BookingService {
+
   private final BookingDao bookingDao;
 
   @Autowired
@@ -30,23 +30,19 @@ public class BookingService {
   }
 
   public Booking getBooking(Long bookingId) {
-    Optional<Booking> bookingOptional = bookingDao.findById(bookingId);
-    return bookingOptional.orElseThrow(BookingNotFoundException::new);
+    return bookingDao
+      .findById(bookingId)
+      .orElseThrow(BookingNotFoundException::new);
   }
 
-  public void createBooking(CreateBookingDto createBookingDto) {
-
+  public Booking createBooking(CreateBookingDto createBookingDto) {
+    return new Booking();
   }
 
-  @Transactional
-  public void updateBooking(Long bookingId, UpdateBookingDto updateBookingDto) {
+  public void updateBooking(
+    Long bookingId,
+    UpdateBookingDto updateBookingDto
+  ) {}
 
-  }
-
-  public void deleteBooking(Long bookingId) {
-    Optional<Booking> bookingOptional = bookingDao.findById(bookingId);
-    //bookingDao.delete(bookingOptional.orElseThrow(BookingNotFoundException::new));
-  }
-
-
+  public void deleteBooking(Long bookingId) {}
 }

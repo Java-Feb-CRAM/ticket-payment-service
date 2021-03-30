@@ -9,5 +9,4 @@ import org.springframework.stereotype.Repository;
  * Mar 17 2021
  */
 @Repository
-public interface BookingDao extends JpaRepository<Booking, Long> {
-}
+public interface BookingDao extends JpaRepository<Booking, Long> {}
