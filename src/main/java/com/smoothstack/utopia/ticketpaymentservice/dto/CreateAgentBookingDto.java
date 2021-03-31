@@ -10,14 +10,14 @@ import lombok.ToString;
 
 /**
  * @author Rob Maes
- * Mar 17 2021
+ * Mar 31 2021
  */
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class CreateBookingDto {
+public class CreateAgentBookingDto {
 
   private Set<Long> flightIds;
 
