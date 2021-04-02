@@ -54,10 +54,11 @@ public class BookingController {
     return bookingService.getBooking(bookingId);
   }
 
-  @GetMapping(path = "/test/{token}")
-  public String test(@PathVariable("token") String token) {
-    bookingService.testCharge(token);
-    return "Yay";
+  @GetMapping(path = "/confirmation/{confirmationCode}")
+  public Booking getBookingByConfirmationCode(
+    @PathVariable("confirmationCode") String confirmationCode
+  ) {
+    return bookingService.getBookingByConfirmationCode(confirmationCode);
   }
 
   @PostMapping(path = "/agent")

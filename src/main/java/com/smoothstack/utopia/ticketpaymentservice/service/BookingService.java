@@ -67,13 +67,10 @@ public class BookingService {
       .orElseThrow(BookingNotFoundException::new);
   }
 
-  public void testCharge(String token) {
-    try {
-      Charge charge = stripeService.chargeCreditCard(token, 9.99f);
-      System.out.println(charge.getId());
-    } catch (Exception e) {
-      System.out.println(e.toString());
-    }
+  public Booking getBookingByConfirmationCode(String confirmationCode) {
+    return bookingDao
+      .findBookingByConfirmationCode(confirmationCode)
+      .orElseThrow(BookingNotFoundException::new);
   }
 
   @Transactional
