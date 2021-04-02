@@ -1,7 +1,9 @@
 package com.smoothstack.utopia.ticketpaymentservice.controller;
 
 import com.smoothstack.utopia.shared.model.Booking;
-import com.smoothstack.utopia.ticketpaymentservice.dto.CreateBookingDto;
+import com.smoothstack.utopia.ticketpaymentservice.dto.CreateAgentBookingDto;
+import com.smoothstack.utopia.ticketpaymentservice.dto.CreateGuestBookingDto;
+import com.smoothstack.utopia.ticketpaymentservice.dto.CreateUserBookingDto;
 import com.smoothstack.utopia.ticketpaymentservice.dto.UpdateBookingDto;
 import com.smoothstack.utopia.ticketpaymentservice.service.BookingService;
 import java.util.List;
@@ -52,26 +54,47 @@ public class BookingController {
     return bookingService.getBooking(bookingId);
   }
 
-  @PostMapping
+  @GetMapping(path = "/test/{token}")
+  public String test(@PathVariable("token") String token) {
+    bookingService.testCharge(token);
+    return "Yay";
+  }
+
+  @PostMapping(path = "/agent")
   @ResponseStatus(HttpStatus.CREATED)
-  public Booking createBooking(
-    @Valid @RequestBody CreateBookingDto createBookingDto
+  public Booking createAgentBooking(
+    @Valid @RequestBody CreateAgentBookingDto createAgentBookingDto
   ) {
-    return bookingService.createBooking(createBookingDto);
+    return bookingService.createAgentBooking(createAgentBookingDto);
   }
 
-  @PutMapping(path = "{bookingId}")
-  @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void updateBooking(
-    @PathVariable("bookingId") Long bookingId,
-    @Valid @RequestBody UpdateBookingDto updateBookingDto
+  @PostMapping(path = "/user")
+  @ResponseStatus(HttpStatus.CREATED)
+  public Booking createUserBooking(
+    @Valid @RequestBody CreateUserBookingDto createUserBookingDto
   ) {
-    bookingService.updateBooking(bookingId, updateBookingDto);
+    return bookingService.createUserBooking(createUserBookingDto);
   }
 
-  @DeleteMapping(path = "{bookingId}")
-  @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void deleteBooking(@PathVariable("bookingId") Long bookingId) {
-    bookingService.deleteBooking(bookingId);
+  @PostMapping(path = "/guest")
+  @ResponseStatus(HttpStatus.CREATED)
+  public Booking createGuestBooking(
+    @Valid @RequestBody CreateGuestBookingDto createGuestBookingDto
+  ) {
+    return bookingService.createGuestBooking(createGuestBookingDto);
   }
+  //  @PutMapping(path = "{bookingId}")
+  //  @ResponseStatus(HttpStatus.NO_CONTENT)
+  //  public void updateBooking(
+  //    @PathVariable("bookingId") Long bookingId,
+  //    @Valid @RequestBody UpdateBookingDto updateBookingDto
+  //  ) {
+  //    bookingService.updateBooking(bookingId, updateBookingDto);
+  //  }
+  //
+  //  @DeleteMapping(path = "{bookingId}")
+  //  @ResponseStatus(HttpStatus.NO_CONTENT)
+  //  public void deleteBooking(@PathVariable("bookingId") Long bookingId) {
+  //    bookingService.deleteBooking(bookingId);
+  //  }
 }

@@ -19,6 +19,8 @@ import lombok.ToString;
 @ToString
 public class CreateUserBookingDto {
 
+  private String stripeToken;
+
   private Set<Long> flightIds;
 
   private List<CreatePassengerDto> passengers;

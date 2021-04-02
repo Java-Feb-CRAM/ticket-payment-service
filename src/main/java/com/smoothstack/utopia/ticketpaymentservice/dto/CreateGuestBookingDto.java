@@ -19,6 +19,7 @@ import lombok.ToString;
 @ToString
 public class CreateGuestBookingDto {
 
+  private String stripeToken;
   private String guestEmail;
   private String guestPhone;
 
