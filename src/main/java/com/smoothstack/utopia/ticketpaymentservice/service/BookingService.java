@@ -15,8 +15,9 @@ import com.smoothstack.utopia.ticketpaymentservice.dto.CreateGuestBookingDto;
 import com.smoothstack.utopia.ticketpaymentservice.dto.CreateUserBookingDto;
 import com.smoothstack.utopia.ticketpaymentservice.dto.UpdateBookingDto;
 import com.smoothstack.utopia.ticketpaymentservice.exception.BookingNotFoundException;
+import com.smoothstack.utopia.ticketpaymentservice.exception.FlightFullException;
 import com.smoothstack.utopia.ticketpaymentservice.exception.FlightNotFoundException;
-import com.smoothstack.utopia.ticketpaymentservice.exception.PaymentException;
+import com.smoothstack.utopia.ticketpaymentservice.exception.PaymentProcessingFailedException;
 import com.stripe.model.Charge;
 import java.util.HashSet;
 import java.util.List;
@@ -85,24 +86,15 @@ public class BookingService {
     return new Booking();
   }
 
-  private Float calculateTotal(Set<Flight> flights, int passengerCount) {
-    Float subtotal = 0f;
-    for (Flight flight : flights) {
-      System.out.println(flight.getSeatPrice());
-      System.out.println(passengerCount);
-      subtotal += flight.getSeatPrice() * passengerCount;
-    }
-    Float tax = 0.0825f * subtotal;
-    return subtotal + tax;
-  }
-
   @Transactional
   public Booking createGuestBooking(
     CreateGuestBookingDto createGuestBookingDto
   ) {
+    int numPassengers = createGuestBookingDto.getPassengers().size();
     Set<Flight> flights = new HashSet<>();
     Set<Passenger> passengers = new HashSet<>();
 
+    // take the list of flight ids and find each flight object
     createGuestBookingDto
       .getFlightIds()
       .forEach(
@@ -110,45 +102,66 @@ public class BookingService {
           Flight flight = flightDao
             .findById(flightId)
             .orElseThrow(FlightNotFoundException::new);
+          // if trying to book more passengers than flight has available seats, throw error
+          if (flight.getAvailableSeats() < numPassengers) {
+            throw new FlightFullException();
+          }
           flights.add(flight);
         }
       );
 
-    Float total = calculateTotal(
-      flights,
-      createGuestBookingDto.getPassengers().size()
-    );
+    // calculate total price based on seat prices and number of passengers
+    Float total = calculateTotal(flights, numPassengers);
 
+    // attempt to charge card for total price and save payment id
     String paymentId = "";
-
     try {
-      Charge charge = stripeService.chargeCreditCard(
-        createGuestBookingDto.getStripeToken(),
-        total
-      );
-      paymentId = charge.getId();
+      paymentId =
+        stripeService.chargeCreditCard(
+          createGuestBookingDto.getStripeToken(),
+          total
+        );
     } catch (Exception e) {
-      throw new PaymentException();
+      throw new PaymentProcessingFailedException();
     }
 
+    /*
+      Create new booking
+      set as active,
+      generate UUID for confirmation code,
+      attach specified flights to booking
+     */
     Booking booking = new Booking();
     booking.setIsActive(true);
     booking.setConfirmationCode(UUID.randomUUID().toString());
     booking.setFlights(flights);
     bookingDao.save(booking);
 
+    /*
+      Create booking payment
+      Associate with booking
+      Set refunded to false
+      Add Stripe transaction ID
+     */
     BookingPayment bookingPayment = new BookingPayment();
     bookingPayment.setBookingId(booking.getId());
     bookingPayment.setRefunded(false);
     bookingPayment.setStripeId(paymentId);
     bookingPaymentDao.save(bookingPayment);
 
+    /*
+      Create guest booking
+      Associate with booking
+      Add guest email
+      Add guest phone
+     */
     BookingGuest guestBooking = new BookingGuest();
     guestBooking.setBookingId(booking.getId());
     guestBooking.setContactEmail(createGuestBookingDto.getGuestEmail());
     guestBooking.setContactPhone(createGuestBookingDto.getGuestPhone());
     bookingGuestDao.save(guestBooking);
 
+    // Associate each flight with the new booking
     flights.forEach(
       flight -> {
         flight.getBookings().add(booking);
@@ -156,6 +169,7 @@ public class BookingService {
       }
     );
 
+    // create a new passenger for each passenger and associate it with the booking
     createGuestBookingDto
       .getPassengers()
       .forEach(
@@ -172,8 +186,12 @@ public class BookingService {
         }
       );
 
+    // associate the passengers with the booking
     booking.setPassengers(passengers);
+    // update the booking
     bookingDao.save(booking);
+    // grab the booking with all of its associated data and return it
+    Booking returnBooking = bookingDao.getOne(booking.getId());
     return booking;
   }
 
@@ -183,4 +201,17 @@ public class BookingService {
   ) {}
 
   public void deleteBooking(Long bookingId) {}
+
+  private Float calculateTotal(Set<Flight> flights, int passengerCount) {
+    // loop through each flight
+    float subtotal = 0f;
+    for (Flight flight : flights) {
+      // get the flight seat price, multiply it by the num of passengers and add it to the counter
+      subtotal += flight.getSeatPrice() * passengerCount;
+    }
+    // calculate sales tax
+    float tax = 0.0825f * subtotal;
+    // return grand total
+    return subtotal + tax;
+  }
 }

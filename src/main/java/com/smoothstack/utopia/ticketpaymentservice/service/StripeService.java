@@ -41,11 +41,12 @@ public class StripeService {
     return paymentInfo;
   }
 
-  public Charge chargeCreditCard(String token, float amount) throws Exception {
+  public String chargeCreditCard(String token, float amount) throws Exception {
     Map<String, Object> chargeParams = new HashMap<String, Object>();
     chargeParams.put("amount", (int) (amount * 100));
     chargeParams.put("currency", "USD");
     chargeParams.put("source", token);
-    return Charge.create(chargeParams);
+    Charge charge = Charge.create(chargeParams);
+    return charge.getId();
   }
 }

@@ -5,10 +5,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
  * @author Rob Maes
- * Apr 02 2021
+ * Apr 05 2021
  */
 @ResponseStatus(
-  value = HttpStatus.PAYMENT_REQUIRED,
-  reason = "Unable to charge card and collect payment"
+  value = HttpStatus.CONFLICT,
+  reason = "The flight is full or does not have enough seats for the specified passengers"
 )
-public class PaymentException extends RuntimeException {}
+public class FlightFullException extends RuntimeException {}
