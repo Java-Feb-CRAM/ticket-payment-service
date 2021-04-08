@@ -24,7 +24,7 @@ pipeline {
           setBuildStatus("Build pending", "PENDING")
           echo 'Testing..'
           script {
-            sh "mvn test"
+            sh "mvn -s /var/lib/jenkins/settings.xml test"
           }
         }
       }
