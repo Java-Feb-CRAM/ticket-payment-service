@@ -1,15 +1,13 @@
 package com.smoothstack.utopia.ticketpaymentservice.dao;
 
 import com.smoothstack.utopia.shared.model.Booking;
-import java.util.Optional;
+import com.smoothstack.utopia.shared.model.BookingAgent;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 /**
  * @author Rob Maes
- * Mar 17 2021
+ * Apr 01 2021
  */
 @Repository
-public interface BookingDao extends JpaRepository<Booking, Long> {
-  Optional<Booking> findBookingByConfirmationCode(String confirmationCode);
-}
+public interface BookingAgentDao extends JpaRepository<BookingAgent, Long> {}

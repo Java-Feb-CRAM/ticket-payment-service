@@ -32,7 +32,7 @@ pipeline {
             steps {
                 echo 'Packging jar file..'
                 script {
-                    sh "mvn clean package"
+                    sh "mvn -s /var/lib/jenkins/settings.xml clean package"
                 }
             }
         }
