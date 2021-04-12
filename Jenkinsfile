@@ -28,13 +28,19 @@ pipeline {
                 script {
                     sh "mvn -s /var/lib/jenkins/settings.xml test"
                 }
+                jacoco(
+                        execPattern: 'target/*.exec',
+                        classPattern: 'target/classes',
+                        sourcePattern: 'src/main/java',
+                        exclusionPattern: 'src/test*'
+                )
             }
         }
         stage('Package') {
             steps {
                 echo 'Packging jar file..'
                 script {
-                    sh "mvn -s /var/lib/jenkins/settings.xml clean package -Dmaven.test.skip.exec"
+                    sh "mvn -s /var/lib/jenkins/settings.xml package -Dmaven.test.skip.exec"
                 }
             }
         }
