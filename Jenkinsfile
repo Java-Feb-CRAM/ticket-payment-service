@@ -11,9 +11,6 @@ void setBuildStatus(String message, String state) {
 
 pipeline {
     agent any
-    options {
-        skipDefaultCheckout(true)
-    }
     environment {
         COMMIT_HASH="${sh(script:'git rev-parse --short HEAD', returnStdout: true).trim()}"
     }
@@ -25,8 +22,6 @@ pipeline {
       stage('Test') {
         steps {
           setBuildStatus("Build pending", "PENDING")
-          cleanWs()
-          checkout scm
           echo 'Testing..'
           script {
             sh "mvn -s /var/lib/jenkins/settings.xml test"
