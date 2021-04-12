@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 public class StripeService {
 
   @Autowired
-  StripeService(@Value("${stripe.apiKey}") String apiKey) {
+  StripeService(@Value("#{${stripe.apiKey}['stripeApiKey']}") String apiKey) {
     Stripe.apiKey = apiKey;
   }
 

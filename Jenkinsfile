@@ -11,6 +11,9 @@ void setBuildStatus(String message, String state) {
 
 pipeline {
     agent any
+    options {
+        skipDefaultCheckout(true)
+    }
     environment {
         COMMIT_HASH="${sh(script:'git rev-parse --short HEAD', returnStdout: true).trim()}"
     }
@@ -22,6 +25,8 @@ pipeline {
       stage('Test') {
         steps {
           setBuildStatus("Build pending", "PENDING")
+          cleanWs()
+          checkout scm
           echo 'Testing..'
           script {
             sh "mvn -s /var/lib/jenkins/settings.xml test"
@@ -32,7 +37,7 @@ pipeline {
             steps {
                 echo 'Packging jar file..'
                 script {
-                    sh "mvn -s /var/lib/jenkins/settings.xml clean package"
+                    sh "mvn -s /var/lib/jenkins/settings.xml clean package -Dmaven.test.skip.exec"
                 }
             }
         }
@@ -46,14 +51,16 @@ pipeline {
                 sh "docker push 038778514259.dkr.ecr.us-east-1.amazonaws.com/utopia-ticket-payment:$COMMIT_HASH"
             }
         }
-        // stage('Deploy') {
-        //    steps {
-        //        sh "touch ECSService.yml"
-        //        sh "rm ECSService.yml"
-        //        sh "wget https://raw.githubusercontent.com/SmoothstackUtopiaProject/CloudFormationTemplates/main/ECSService.yml"
-        //        sh "aws cloudformation deploy --stack-name UtopiaFlightMS --template-file ./ECSService.yml --parameter-overrides ApplicationName=UtopiaFlightMS ECRepositoryUri=$AWS_ID/utopiaairlines/flightms:$COMMIT_HASH DBUsername=$DB_USERNAME DBPassword=$DB_PASSWORD SubnetID=$SUBNET_ID SecurityGroupID=$SECURITY_GROUP_ID TGArn=$UTOPIA_FLIGHTMS_TARGETGROUP --capabilities \"CAPABILITY_IAM\" \"CAPABILITY_NAMED_IAM\""
-        //    }
-        // }
+        stage('Deploy') {
+            steps {
+                echo 'Fetching cloud cloudformation template..'
+                sh "touch ECS.yml"
+                sh "rm ECS.yml"
+                sh "wget https://raw.githubusercontent.com/Java-Feb-CRAM/cloud-formation/main/ECS.yml"
+                echo 'Deploying cloudformation..'
+                sh "aws cloudformation deploy --stack-name UtopiaTicketPaymentMS --template-file ./ECS.yml --parameter-overrides ApplicationName=TicketPaymentMS ECRepositoryUri=038778514259.dkr.ecr.us-east-1.amazonaws.com/utopia-ticket-payment:$COMMIT_HASH ExecutionRoleArn=arn:aws:iam::038778514259:role/ecsTaskExecutionRole TargetGroupArn=arn:aws:elasticloadbalancing:us-east-1:038778514259:targetgroup/TicketPaymentTG/a6822a34f0252b56 --role-arn arn:aws:iam::038778514259:role/CloudFormationECS --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM --region us-east-1"
+            }
+        }
         stage('Cleanup') {
             steps {
               echo 'Cleaning up..'
@@ -62,6 +69,14 @@ pipeline {
         }
     }
     post {
+     always {
+                cleanWs(cleanWhenNotBuilt: false,
+                                    deleteDirs: true,
+                                    disableDeferredWipeout: true,
+                                    notFailBuild: true,
+                                    patterns: [[pattern: '.gitignore', type: 'INCLUDE'],
+                                               [pattern: '.propsfile', type: 'EXCLUDE']])
+            }
       success {
         setBuildStatus("Build succeeded", "SUCCESS")
       }
