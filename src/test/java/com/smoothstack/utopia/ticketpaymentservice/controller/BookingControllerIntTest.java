@@ -34,6 +34,7 @@ import com.smoothstack.utopia.ticketpaymentservice.exception.FlightFullException
 import com.smoothstack.utopia.ticketpaymentservice.exception.FlightNotFoundException;
 import com.smoothstack.utopia.ticketpaymentservice.exception.PaymentProcessingFailedException;
 import com.smoothstack.utopia.ticketpaymentservice.service.StripeService;
+import com.stripe.exception.CardException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
@@ -361,7 +362,7 @@ class BookingControllerIntTest {
       .when(
         stripeService.chargeCreditCard(Mockito.anyString(), Mockito.anyFloat())
       )
-      .thenThrow(Exception.class);
+      .thenThrow(CardException.class);
     mvc
       .perform(
         post("/bookings/guest")
