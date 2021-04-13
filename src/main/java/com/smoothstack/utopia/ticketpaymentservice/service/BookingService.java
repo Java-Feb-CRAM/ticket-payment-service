@@ -10,10 +10,7 @@ import com.smoothstack.utopia.ticketpaymentservice.dao.BookingGuestDao;
 import com.smoothstack.utopia.ticketpaymentservice.dao.BookingPaymentDao;
 import com.smoothstack.utopia.ticketpaymentservice.dao.FlightDao;
 import com.smoothstack.utopia.ticketpaymentservice.dao.PassengerDao;
-import com.smoothstack.utopia.ticketpaymentservice.dto.CreateAgentBookingDto;
 import com.smoothstack.utopia.ticketpaymentservice.dto.CreateGuestBookingDto;
-import com.smoothstack.utopia.ticketpaymentservice.dto.CreateUserBookingDto;
-import com.smoothstack.utopia.ticketpaymentservice.dto.UpdateBookingDto;
 import com.smoothstack.utopia.ticketpaymentservice.exception.BookingNotFoundException;
 import com.smoothstack.utopia.ticketpaymentservice.exception.FlightFullException;
 import com.smoothstack.utopia.ticketpaymentservice.exception.FlightNotFoundException;
@@ -71,18 +68,6 @@ public class BookingService {
     return bookingDao
       .findBookingByConfirmationCode(confirmationCode)
       .orElseThrow(BookingNotFoundException::new);
-  }
-
-  @Transactional
-  public Booking createAgentBooking(
-    CreateAgentBookingDto createAgentBookingDto
-  ) {
-    return new Booking();
-  }
-
-  @Transactional
-  public Booking createUserBooking(CreateUserBookingDto createUserBookingDto) {
-    return new Booking();
   }
 
   @Transactional
@@ -191,14 +176,6 @@ public class BookingService {
     bookingDao.save(booking);
     // grab the booking with all of its associated data and return it
     return bookingDao.getOne(booking.getId());
-  }
-
-  public void updateBooking(Long bookingId, UpdateBookingDto updateBookingDto) {
-    // TODO
-  }
-
-  public void deleteBooking(Long bookingId) {
-    // TODO
   }
 
   private Float calculateTotal(Set<Flight> flights, int passengerCount) {
