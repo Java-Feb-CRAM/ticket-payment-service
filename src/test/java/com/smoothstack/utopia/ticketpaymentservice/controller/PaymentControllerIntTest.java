@@ -1,14 +1,10 @@
 package com.smoothstack.utopia.ticketpaymentservice.controller;
 
 import static org.hamcrest.Matchers.is;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.xpath;
 
 import com.smoothstack.utopia.shared.model.Booking;
 import com.smoothstack.utopia.shared.model.BookingPayment;
@@ -41,7 +37,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @TestPropertySource(
   locations = "classpath:application-integrationtest.properties"
 )
-public class PaymentControllerIntTest {
+class PaymentControllerIntTest {
 
   @Autowired
   MockMvc mvc;
@@ -78,7 +74,7 @@ public class PaymentControllerIntTest {
     GET Tests
    */
   @Test
-  public void canGetPayment_whenGetPaymentWithValidId_thenStatus200()
+  void canGetPayment_whenGetPaymentWithValidId_thenStatus200()
     throws Exception {
     BookingPayment payment = createBookingPayment();
     PaymentInfoDto returnInfo = new PaymentInfoDto();
@@ -103,7 +99,7 @@ public class PaymentControllerIntTest {
   }
 
   @Test
-  public void cannotGetPayment_whenGetPaymentWithInvalidId_thenStatus404()
+  void cannotGetPayment_whenGetPaymentWithInvalidId_thenStatus404()
     throws Exception {
     Mockito
       .when(stripeService.getPaymentInfo(Mockito.anyString()))

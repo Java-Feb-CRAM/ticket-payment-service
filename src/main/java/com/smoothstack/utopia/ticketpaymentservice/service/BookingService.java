@@ -18,7 +18,6 @@ import com.smoothstack.utopia.ticketpaymentservice.exception.BookingNotFoundExce
 import com.smoothstack.utopia.ticketpaymentservice.exception.FlightFullException;
 import com.smoothstack.utopia.ticketpaymentservice.exception.FlightNotFoundException;
 import com.smoothstack.utopia.ticketpaymentservice.exception.PaymentProcessingFailedException;
-import com.stripe.model.Charge;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -191,16 +190,16 @@ public class BookingService {
     // update the booking
     bookingDao.save(booking);
     // grab the booking with all of its associated data and return it
-    Booking returnBooking = bookingDao.getOne(booking.getId());
-    return booking;
+    return bookingDao.getOne(booking.getId());
   }
 
-  public void updateBooking(
-    Long bookingId,
-    UpdateBookingDto updateBookingDto
-  ) {}
+  public void updateBooking(Long bookingId, UpdateBookingDto updateBookingDto) {
+    // TODO
+  }
 
-  public void deleteBooking(Long bookingId) {}
+  public void deleteBooking(Long bookingId) {
+    // TODO
+  }
 
   private Float calculateTotal(Set<Flight> flights, int passengerCount) {
     // loop through each flight
