@@ -1,6 +1,5 @@
 package com.smoothstack.utopia.ticketpaymentservice.dao;
 
-import com.smoothstack.utopia.shared.model.Booking;
 import com.smoothstack.utopia.shared.model.BookingAgent;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

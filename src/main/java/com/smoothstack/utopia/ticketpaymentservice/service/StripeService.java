@@ -1,9 +1,13 @@
 package com.smoothstack.utopia.ticketpaymentservice.service;
 
-import com.netflix.discovery.converters.Auto;
 import com.smoothstack.utopia.ticketpaymentservice.dto.PaymentInfoDto;
 import com.smoothstack.utopia.ticketpaymentservice.exception.PaymentNotFoundException;
 import com.stripe.Stripe;
+import com.stripe.exception.APIConnectionException;
+import com.stripe.exception.APIException;
+import com.stripe.exception.AuthenticationException;
+import com.stripe.exception.CardException;
+import com.stripe.exception.InvalidRequestException;
 import com.stripe.model.Card;
 import com.stripe.model.Charge;
 import java.util.HashMap;
@@ -41,8 +45,9 @@ public class StripeService {
     return paymentInfo;
   }
 
-  public String chargeCreditCard(String token, float amount) throws Exception {
-    Map<String, Object> chargeParams = new HashMap<String, Object>();
+  public String chargeCreditCard(String token, float amount)
+    throws AuthenticationException, InvalidRequestException, APIConnectionException, CardException, APIException {
+    Map<String, Object> chargeParams = new HashMap<>();
     chargeParams.put("amount", (int) (amount * 100));
     chargeParams.put("currency", "USD");
     chargeParams.put("source", token);

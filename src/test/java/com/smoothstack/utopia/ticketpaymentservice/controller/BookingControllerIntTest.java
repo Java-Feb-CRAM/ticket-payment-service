@@ -1,16 +1,13 @@
 package com.smoothstack.utopia.ticketpaymentservice.controller;
 
 import static org.hamcrest.Matchers.is;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.xpath;
 
-import com.netflix.discovery.converters.Auto;
 import com.smoothstack.utopia.shared.model.Airplane;
 import com.smoothstack.utopia.shared.model.AirplaneType;
 import com.smoothstack.utopia.shared.model.Airport;
@@ -39,11 +36,9 @@ import com.smoothstack.utopia.ticketpaymentservice.exception.PaymentProcessingFa
 import com.smoothstack.utopia.ticketpaymentservice.service.StripeService;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -68,7 +63,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @TestPropertySource(
   locations = "classpath:application-integrationtest.properties"
 )
-public class BookingControllerIntTest {
+class BookingControllerIntTest {
 
   @Autowired
   MockMvc mvc;
@@ -206,8 +201,7 @@ public class BookingControllerIntTest {
    */
 
   @Test
-  public void canGetAllBookings_whenGetBookings_thenStatus200()
-    throws Exception {
+  void canGetAllBookings_whenGetBookings_thenStatus200() throws Exception {
     Booking booking = createGuestBooking(Set.of(flightJFKtoIAH));
     mvc
       .perform(get("/bookings").accept(MediaType.APPLICATION_XML))
@@ -220,8 +214,7 @@ public class BookingControllerIntTest {
   }
 
   @Test
-  public void canGetBooking_whenGetBookingWithId_thenStatus200()
-    throws Exception {
+  void canGetBooking_whenGetBookingWithId_thenStatus200() throws Exception {
     Booking booking = createGuestBooking(Set.of(flightLAXtoSFO));
     mvc
       .perform(get("/bookings/{id}", booking.getId()))
@@ -235,7 +228,7 @@ public class BookingControllerIntTest {
   }
 
   @Test
-  public void cannotGetBooking_whenGetBookingWithInvalidId_thenStatus404()
+  void cannotGetBooking_whenGetBookingWithInvalidId_thenStatus404()
     throws Exception {
     mvc
       .perform(get("/bookings/{id}", 2))
@@ -249,7 +242,7 @@ public class BookingControllerIntTest {
   }
 
   @Test
-  public void canGetBooking_whenGetBookingWithConfirmationCode_thenStatus200()
+  void canGetBooking_whenGetBookingWithConfirmationCode_thenStatus200()
     throws Exception {
     Booking booking = createGuestBooking(Set.of(flightLAXtoSFO));
     mvc
@@ -269,7 +262,7 @@ public class BookingControllerIntTest {
   }
 
   @Test
-  public void cannotGetBooking_whenGetBookingWithInvalidConfirmationCode_thenStatus404()
+  void cannotGetBooking_whenGetBookingWithInvalidConfirmationCode_thenStatus404()
     throws Exception {
     mvc
       .perform(
@@ -291,7 +284,7 @@ public class BookingControllerIntTest {
     POST Tests
    */
   @Test
-  public void canCreateBooking_whenPostBookingWithValidData_thenStatus201()
+  void canCreateBooking_whenPostBookingWithValidData_thenStatus201()
     throws Exception {
     CreatePassengerDto passengerDto = new CreatePassengerDto();
     passengerDto.setAddress("Texas");
@@ -350,7 +343,7 @@ public class BookingControllerIntTest {
   }
 
   @Test
-  public void cannotCreateBooking_whenPostBookingWithInvalidPayment_thenStatus402()
+  void cannotCreateBooking_whenPostBookingWithInvalidPayment_thenStatus402()
     throws Exception {
     CreatePassengerDto passengerDto = new CreatePassengerDto();
     passengerDto.setAddress("Texas");
@@ -386,7 +379,7 @@ public class BookingControllerIntTest {
   }
 
   @Test
-  public void cannotCreateBooking_whenPostBookingWithInvalidFlight_thenStatus404()
+  void cannotCreateBooking_whenPostBookingWithInvalidFlight_thenStatus404()
     throws Exception {
     CreatePassengerDto passengerDto = new CreatePassengerDto();
     passengerDto.setAddress("Texas");
@@ -422,7 +415,7 @@ public class BookingControllerIntTest {
   }
 
   @Test
-  public void cannotCreateBooking_whenPostBookingWithFullFlight_thenStatus409()
+  void cannotCreateBooking_whenPostBookingWithFullFlight_thenStatus409()
     throws Exception {
     CreatePassengerDto passengerDto = new CreatePassengerDto();
     passengerDto.setAddress("Texas");

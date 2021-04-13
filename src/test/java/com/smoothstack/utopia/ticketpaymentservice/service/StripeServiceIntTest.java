@@ -17,13 +17,13 @@ import org.springframework.test.context.TestPropertySource;
 @TestPropertySource(
   locations = "classpath:application-integrationtest.properties"
 )
-public class StripeServiceIntTest {
+class StripeServiceIntTest {
 
   @Autowired
   private StripeService stripeService;
 
   @Test
-  public void testChargeCreditCard() throws Exception {
+  void testChargeCreditCard() throws Exception {
     Mockito
       .when(stripeService.chargeCreditCard("ABC-DEF", 10.0f))
       .thenReturn("XYZ");
