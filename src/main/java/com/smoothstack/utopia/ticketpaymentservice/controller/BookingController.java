@@ -1,9 +1,7 @@
 package com.smoothstack.utopia.ticketpaymentservice.controller;
 
 import com.smoothstack.utopia.shared.model.Booking;
-import com.smoothstack.utopia.ticketpaymentservice.dto.CreateAgentBookingDto;
 import com.smoothstack.utopia.ticketpaymentservice.dto.CreateGuestBookingDto;
-import com.smoothstack.utopia.ticketpaymentservice.dto.CreateUserBookingDto;
 import com.smoothstack.utopia.ticketpaymentservice.service.BookingService;
 import java.util.List;
 import javax.validation.Valid;
@@ -54,22 +52,6 @@ public class BookingController {
     @PathVariable("confirmationCode") String confirmationCode
   ) {
     return bookingService.getBookingByConfirmationCode(confirmationCode);
-  }
-
-  @PostMapping(path = "/agent")
-  @ResponseStatus(HttpStatus.CREATED)
-  public Booking createAgentBooking(
-    @Valid @RequestBody CreateAgentBookingDto createAgentBookingDto
-  ) {
-    return bookingService.createAgentBooking(createAgentBookingDto);
-  }
-
-  @PostMapping(path = "/user")
-  @ResponseStatus(HttpStatus.CREATED)
-  public Booking createUserBooking(
-    @Valid @RequestBody CreateUserBookingDto createUserBookingDto
-  ) {
-    return bookingService.createUserBooking(createUserBookingDto);
   }
 
   @PostMapping(path = "/guest")
