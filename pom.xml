@@ -86,7 +86,7 @@
     <dependency>
       <groupId>com.smoothstack.utopia</groupId>
       <artifactId>shared</artifactId>
-      <version>2.2-SNAPSHOT</version>
+      <version>2.6-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.springdoc</groupId>

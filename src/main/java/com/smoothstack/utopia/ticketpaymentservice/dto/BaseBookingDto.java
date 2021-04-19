@@ -10,15 +10,16 @@ import lombok.ToString;
 
 /**
  * @author Rob Maes
- * Mar 31 2021
+ * Apr 19 2021
  */
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class CreateGuestBookingDto extends BaseBookingDto {
+public abstract class BaseBookingDto {
 
-  private String guestEmail;
-  private String guestPhone;
+  private String stripeToken;
+  private Set<Long> flightIds;
+  private List<CreatePassengerDto> passengers;
 }

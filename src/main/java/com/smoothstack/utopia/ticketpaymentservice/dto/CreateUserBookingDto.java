@@ -17,11 +17,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class CreateUserBookingDto {
+public class CreateUserBookingDto extends BaseBookingDto {
 
-  private String stripeToken;
-
-  private Set<Long> flightIds;
-
-  private List<CreatePassengerDto> passengers;
+  private Long userId;
 }

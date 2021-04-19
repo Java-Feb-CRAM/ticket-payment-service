@@ -1,7 +1,12 @@
 package com.smoothstack.utopia.ticketpaymentservice.controller;
 
+import com.smoothstack.utopia.shared.mailmodels.BookingConfirmationMailModel;
+import com.smoothstack.utopia.shared.mailmodels.SampleMailModel;
 import com.smoothstack.utopia.shared.model.Booking;
+import com.smoothstack.utopia.shared.service.EmailService;
+import com.smoothstack.utopia.ticketpaymentservice.dto.CreateAgentBookingDto;
 import com.smoothstack.utopia.ticketpaymentservice.dto.CreateGuestBookingDto;
+import com.smoothstack.utopia.ticketpaymentservice.dto.CreateUserBookingDto;
 import com.smoothstack.utopia.ticketpaymentservice.service.BookingService;
 import java.util.List;
 import javax.validation.Valid;
@@ -30,10 +35,16 @@ import org.springframework.web.bind.annotation.RestController;
 )
 public class BookingController {
 
+  private final EmailService emailService;
+
   private final BookingService bookingService;
 
   @Autowired
-  public BookingController(BookingService bookingService) {
+  public BookingController(
+    EmailService emailService,
+    BookingService bookingService
+  ) {
+    this.emailService = emailService;
     this.bookingService = bookingService;
   }
 
@@ -54,11 +65,39 @@ public class BookingController {
     return bookingService.getBookingByConfirmationCode(confirmationCode);
   }
 
+  @GetMapping(path = "test")
+  public String test() {
+    BookingConfirmationMailModel sampleModel = new BookingConfirmationMailModel();
+    sampleModel.setRecipientName("Rob");
+    this.emailService.send(
+        "remilmaes@gmail.com",
+        EmailService.MailTemplate.BOOKING_CONFIRMATION,
+        sampleModel
+      );
+    return "hello";
+  }
+
   @PostMapping(path = "/guest")
   @ResponseStatus(HttpStatus.CREATED)
   public Booking createGuestBooking(
     @Valid @RequestBody CreateGuestBookingDto createGuestBookingDto
   ) {
     return bookingService.createGuestBooking(createGuestBookingDto);
+  }
+
+  @PostMapping(path = "/user")
+  @ResponseStatus(HttpStatus.CREATED)
+  public Booking createUserBooking(
+    @Valid @RequestBody CreateUserBookingDto createUserBookingDto
+  ) {
+    return bookingService.createUserBooking(createUserBookingDto);
+  }
+
+  @PostMapping(path = "/agent")
+  @ResponseStatus(HttpStatus.CREATED)
+  public Booking createAgentBooking(
+    @Valid @RequestBody CreateAgentBookingDto createAgentBookingDto
+  ) {
+    return bookingService.createAgentBooking(createAgentBookingDto);
   }
 }

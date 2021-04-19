@@ -1,20 +1,30 @@
 package com.smoothstack.utopia.ticketpaymentservice.service;
 
 import com.smoothstack.utopia.shared.model.Booking;
+import com.smoothstack.utopia.shared.model.BookingAgent;
 import com.smoothstack.utopia.shared.model.BookingGuest;
 import com.smoothstack.utopia.shared.model.BookingPayment;
+import com.smoothstack.utopia.shared.model.BookingUser;
 import com.smoothstack.utopia.shared.model.Flight;
 import com.smoothstack.utopia.shared.model.Passenger;
+import com.smoothstack.utopia.shared.model.User;
+import com.smoothstack.utopia.ticketpaymentservice.dao.BookingAgentDao;
 import com.smoothstack.utopia.ticketpaymentservice.dao.BookingDao;
 import com.smoothstack.utopia.ticketpaymentservice.dao.BookingGuestDao;
 import com.smoothstack.utopia.ticketpaymentservice.dao.BookingPaymentDao;
+import com.smoothstack.utopia.ticketpaymentservice.dao.BookingUserDao;
 import com.smoothstack.utopia.ticketpaymentservice.dao.FlightDao;
 import com.smoothstack.utopia.ticketpaymentservice.dao.PassengerDao;
+import com.smoothstack.utopia.ticketpaymentservice.dao.UserDao;
+import com.smoothstack.utopia.ticketpaymentservice.dto.BaseBookingDto;
+import com.smoothstack.utopia.ticketpaymentservice.dto.CreateAgentBookingDto;
 import com.smoothstack.utopia.ticketpaymentservice.dto.CreateGuestBookingDto;
+import com.smoothstack.utopia.ticketpaymentservice.dto.CreateUserBookingDto;
 import com.smoothstack.utopia.ticketpaymentservice.exception.BookingNotFoundException;
 import com.smoothstack.utopia.ticketpaymentservice.exception.FlightFullException;
 import com.smoothstack.utopia.ticketpaymentservice.exception.FlightNotFoundException;
 import com.smoothstack.utopia.ticketpaymentservice.exception.PaymentProcessingFailedException;
+import com.smoothstack.utopia.ticketpaymentservice.exception.UserNotFoundException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -36,6 +46,9 @@ public class BookingService {
   private final PassengerDao passengerDao;
   private final BookingGuestDao bookingGuestDao;
   private final BookingPaymentDao bookingPaymentDao;
+  private final UserDao userDao;
+  private final BookingUserDao bookingUserDao;
+  private final BookingAgentDao bookingAgentDao;
 
   @Autowired
   public BookingService(
@@ -44,7 +57,10 @@ public class BookingService {
     FlightDao flightDao,
     PassengerDao passengerDao,
     BookingGuestDao bookingGuestDao,
-    BookingPaymentDao bookingPaymentDao
+    BookingPaymentDao bookingPaymentDao,
+    UserDao userDao,
+    BookingUserDao bookingUserDao,
+    BookingAgentDao bookingAgentDao
   ) {
     this.stripeService = stripeService;
     this.bookingDao = bookingDao;
@@ -52,6 +68,9 @@ public class BookingService {
     this.passengerDao = passengerDao;
     this.bookingGuestDao = bookingGuestDao;
     this.bookingPaymentDao = bookingPaymentDao;
+    this.userDao = userDao;
+    this.bookingUserDao = bookingUserDao;
+    this.bookingAgentDao = bookingAgentDao;
   }
 
   public List<Booking> getAllBookings() {
@@ -71,15 +90,13 @@ public class BookingService {
   }
 
   @Transactional
-  public Booking createGuestBooking(
-    CreateGuestBookingDto createGuestBookingDto
-  ) {
-    int numPassengers = createGuestBookingDto.getPassengers().size();
+  protected Booking createBooking(BaseBookingDto baseBookingDto) {
+    int numPassengers = baseBookingDto.getPassengers().size();
     Set<Flight> flights = new HashSet<>();
     Set<Passenger> passengers = new HashSet<>();
 
     // take the list of flight ids and find each flight object
-    createGuestBookingDto
+    baseBookingDto
       .getFlightIds()
       .forEach(
         flightId -> {
@@ -101,10 +118,7 @@ public class BookingService {
     String paymentId = "";
     try {
       paymentId =
-        stripeService.chargeCreditCard(
-          createGuestBookingDto.getStripeToken(),
-          total
-        );
+        stripeService.chargeCreditCard(baseBookingDto.getStripeToken(), total);
     } catch (Exception e) {
       throw new PaymentProcessingFailedException();
     }
@@ -133,18 +147,6 @@ public class BookingService {
     bookingPayment.setStripeId(paymentId);
     bookingPaymentDao.save(bookingPayment);
 
-    /*
-      Create guest booking
-      Associate with booking
-      Add guest email
-      Add guest phone
-     */
-    BookingGuest guestBooking = new BookingGuest();
-    guestBooking.setBookingId(booking.getId());
-    guestBooking.setContactEmail(createGuestBookingDto.getGuestEmail());
-    guestBooking.setContactPhone(createGuestBookingDto.getGuestPhone());
-    bookingGuestDao.save(guestBooking);
-
     // Associate each flight with the new booking
     flights.forEach(
       flight -> {
@@ -154,7 +156,7 @@ public class BookingService {
     );
 
     // create a new passenger for each passenger and associate it with the booking
-    createGuestBookingDto
+    baseBookingDto
       .getPassengers()
       .forEach(
         createPassengerDto -> {
@@ -174,8 +176,49 @@ public class BookingService {
     booking.setPassengers(passengers);
     // update the booking
     bookingDao.save(booking);
-    // grab the booking with all of its associated data and return it
-    return bookingDao.getOne(booking.getId());
+
+    return booking;
+  }
+
+  @Transactional
+  public Booking createGuestBooking(
+    CreateGuestBookingDto createGuestBookingDto
+  ) {
+    Booking booking = createBooking(createGuestBookingDto);
+    BookingGuest bookingGuest = new BookingGuest();
+    bookingGuest.setBookingId(booking.getId());
+    bookingGuest.setContactEmail(createGuestBookingDto.getGuestEmail());
+    bookingGuest.setContactPhone(createGuestBookingDto.getGuestPhone());
+    bookingGuestDao.save(bookingGuest);
+    return bookingDao.findById(booking.getId()).get();
+  }
+
+  @Transactional
+  public Booking createUserBooking(CreateUserBookingDto createUserBookingDto) {
+    Booking booking = createBooking(createUserBookingDto);
+    BookingUser bookingUser = new BookingUser();
+    User user = userDao
+      .findById(createUserBookingDto.getUserId())
+      .orElseThrow(UserNotFoundException::new);
+    bookingUser.setUser(user);
+    bookingUser.setBookingId(booking.getId());
+    bookingUserDao.save(bookingUser);
+    return bookingDao.findById(booking.getId()).get();
+  }
+
+  @Transactional
+  public Booking createAgentBooking(
+    CreateAgentBookingDto createAgentBookingDto
+  ) {
+    Booking booking = createBooking(createAgentBookingDto);
+    BookingAgent bookingAgent = new BookingAgent();
+    User user = userDao
+      .findById(createAgentBookingDto.getAgentId())
+      .orElseThrow(UserNotFoundException::new);
+    bookingAgent.setAgent(user);
+    bookingAgent.setBookingId(booking.getId());
+    bookingAgentDao.save(bookingAgent);
+    return bookingDao.findById(booking.getId()).get();
   }
 
   private Float calculateTotal(Set<Flight> flights, int passengerCount) {
