@@ -103,6 +103,19 @@ public class BookingService {
   }
 
   @Transactional
+  public void cancelBooking(Long bookingId) {
+    Booking booking = bookingDao
+      .findById(bookingId)
+      .orElseThrow(BookingNotFoundException::new);
+    BookingPayment payment = booking.getBookingPayment();
+    stripeService.refundCharge(payment.getStripeId());
+    payment.setRefunded(true);
+    bookingPaymentDao.save(payment);
+    booking.setIsActive(false);
+    bookingDao.save(booking);
+  }
+
+  @Transactional
   protected Bill createBooking(BaseBookingDto baseBookingDto) {
     int numPassengers = baseBookingDto.getPassengers().size();
     Set<Flight> flights = new HashSet<>();
