@@ -4,6 +4,7 @@ import com.smoothstack.utopia.shared.model.Booking;
 import com.smoothstack.utopia.shared.model.Flight;
 import java.text.DecimalFormat;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,7 +23,7 @@ public class Bill {
 
   private static DecimalFormat df = new DecimalFormat("0.00");
   private Float total = 0.0f;
-  private Map<String, String> lineItems = new HashMap<>();
+  private Map<String, String> lineItems = new LinkedHashMap<>();
   private Booking booking;
 
   public void addLineItem(Flight flight, Integer passengerCount) {

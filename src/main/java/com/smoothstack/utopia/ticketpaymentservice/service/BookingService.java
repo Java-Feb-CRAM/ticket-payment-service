@@ -108,9 +108,11 @@ public class BookingService {
       .findById(bookingId)
       .orElseThrow(BookingNotFoundException::new);
     BookingPayment payment = booking.getBookingPayment();
-    stripeService.refundCharge(payment.getStripeId());
-    payment.setRefunded(true);
-    bookingPaymentDao.save(payment);
+    if (!payment.getRefunded()) {
+      stripeService.refundCharge(payment.getStripeId());
+      payment.setRefunded(true);
+      bookingPaymentDao.save(payment);
+    }
     booking.setIsActive(false);
     bookingDao.save(booking);
   }

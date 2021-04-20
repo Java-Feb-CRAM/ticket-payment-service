@@ -1,6 +1,7 @@
 package com.smoothstack.utopia.ticketpaymentservice.controller;
 
 import static org.hamcrest.Matchers.is;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -45,6 +46,7 @@ import com.smoothstack.utopia.ticketpaymentservice.exception.BookingNotFoundExce
 import com.smoothstack.utopia.ticketpaymentservice.exception.FlightFullException;
 import com.smoothstack.utopia.ticketpaymentservice.exception.FlightNotFoundException;
 import com.smoothstack.utopia.ticketpaymentservice.exception.PaymentProcessingFailedException;
+import com.smoothstack.utopia.ticketpaymentservice.exception.PaymentRefundException;
 import com.smoothstack.utopia.ticketpaymentservice.exception.UserNotFoundException;
 import com.smoothstack.utopia.ticketpaymentservice.service.StripeService;
 import com.stripe.exception.CardException;
@@ -776,6 +778,68 @@ class BookingControllerIntTest {
           Assertions.assertTrue(
             result.getResolvedException() instanceof UserNotFoundException
           )
+      );
+  }
+
+  /*
+    DELETE Tests
+   */
+  @Test
+  void canCancelBooking_whenDeleteBookingWithValidId_thenStatus204()
+    throws Exception {
+    Booking booking = createGuestBooking(Set.of(flightLAXtoSFO));
+    Mockito.doNothing().when(stripeService).refundCharge(Mockito.anyString());
+    mvc
+      .perform(delete("/bookings/{id}", booking.getId()))
+      .andExpect(status().isNoContent())
+      .andExpect(
+        result -> {
+          Booking cancelledBooking = bookingDao.findById(booking.getId()).get();
+          Assertions.assertFalse(cancelledBooking.getIsActive());
+          Assertions.assertTrue(
+            cancelledBooking.getBookingPayment().getRefunded()
+          );
+        }
+      );
+  }
+
+  @Test
+  void cannotCancelBooking_whenDeleteBookingWithInvalidId_thenStatus404()
+    throws Exception {
+    mvc
+      .perform(delete("/bookings/{id}", 234234L))
+      .andExpect(status().isNotFound())
+      .andExpect(
+        result -> {
+          Assertions.assertTrue(
+            result.getResolvedException() instanceof BookingNotFoundException
+          );
+        }
+      );
+  }
+
+  @Test
+  void cannotCancelBooking_whenDeleteBookingWithRefundException_thenStatus402()
+    throws Exception {
+    Booking booking = createGuestBooking(Set.of(flightLAXtoSFO));
+    Mockito
+      .doThrow(new PaymentRefundException())
+      .when(stripeService)
+      .refundCharge(Mockito.anyString());
+    mvc
+      .perform(delete("/bookings/{id}", booking.getId()))
+      .andExpect(status().isPaymentRequired())
+      .andExpect(
+        result -> {
+          Assertions.assertTrue(
+            result.getResolvedException() instanceof PaymentRefundException
+          );
+          Booking cancelledBooking = bookingDao.findById(booking.getId()).get();
+          Assertions.assertTrue(cancelledBooking.getIsActive());
+          Assertions.assertFalse(
+            cancelledBooking.getBookingPayment().getRefunded()
+          );
+        }
       );
   }
 }
