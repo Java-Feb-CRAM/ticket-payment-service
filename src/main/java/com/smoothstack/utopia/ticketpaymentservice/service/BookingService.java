@@ -95,6 +95,13 @@ public class BookingService {
       .orElseThrow(BookingNotFoundException::new);
   }
 
+  public List<Booking> getBookingsByUser(Long userId) {
+    User user = userDao
+      .findById(userId)
+      .orElseThrow(UserNotFoundException::new);
+    return bookingDao.findBookingByBookingUser_User(user);
+  }
+
   @Transactional
   protected Bill createBooking(BaseBookingDto baseBookingDto) {
     int numPassengers = baseBookingDto.getPassengers().size();

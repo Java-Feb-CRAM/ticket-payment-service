@@ -66,6 +66,11 @@ public class BookingController {
     return bookingService.getBookingByConfirmationCode(confirmationCode);
   }
 
+  @GetMapping(path = "/user/{userId}")
+  public List<Booking> getBookingsByUser(@PathVariable("userId") Long userId) {
+    return bookingService.getBookingsByUser(userId);
+  }
+
   @PostMapping(path = "/guest")
   @ResponseStatus(HttpStatus.CREATED)
   public Booking createGuestBooking(
