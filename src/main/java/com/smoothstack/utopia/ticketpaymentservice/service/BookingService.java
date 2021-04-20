@@ -1,5 +1,6 @@
 package com.smoothstack.utopia.ticketpaymentservice.service;
 
+import com.smoothstack.utopia.shared.mailmodels.BillingMailModel;
 import com.smoothstack.utopia.shared.model.Booking;
 import com.smoothstack.utopia.shared.model.BookingAgent;
 import com.smoothstack.utopia.shared.model.BookingGuest;
@@ -8,6 +9,8 @@ import com.smoothstack.utopia.shared.model.BookingUser;
 import com.smoothstack.utopia.shared.model.Flight;
 import com.smoothstack.utopia.shared.model.Passenger;
 import com.smoothstack.utopia.shared.model.User;
+import com.smoothstack.utopia.shared.service.EmailService;
+import com.smoothstack.utopia.ticketpaymentservice.Bill;
 import com.smoothstack.utopia.ticketpaymentservice.dao.BookingAgentDao;
 import com.smoothstack.utopia.ticketpaymentservice.dao.BookingDao;
 import com.smoothstack.utopia.ticketpaymentservice.dao.BookingGuestDao;
@@ -41,6 +44,7 @@ import org.springframework.stereotype.Service;
 public class BookingService {
 
   private final StripeService stripeService;
+  private final EmailService emailService;
   private final BookingDao bookingDao;
   private final FlightDao flightDao;
   private final PassengerDao passengerDao;
@@ -53,6 +57,7 @@ public class BookingService {
   @Autowired
   public BookingService(
     StripeService stripeService,
+    EmailService emailService,
     BookingDao bookingDao,
     FlightDao flightDao,
     PassengerDao passengerDao,
@@ -63,6 +68,7 @@ public class BookingService {
     BookingAgentDao bookingAgentDao
   ) {
     this.stripeService = stripeService;
+    this.emailService = emailService;
     this.bookingDao = bookingDao;
     this.flightDao = flightDao;
     this.passengerDao = passengerDao;
@@ -90,7 +96,7 @@ public class BookingService {
   }
 
   @Transactional
-  protected Booking createBooking(BaseBookingDto baseBookingDto) {
+  protected Bill createBooking(BaseBookingDto baseBookingDto) {
     int numPassengers = baseBookingDto.getPassengers().size();
     Set<Flight> flights = new HashSet<>();
     Set<Passenger> passengers = new HashSet<>();
@@ -112,13 +118,16 @@ public class BookingService {
       );
 
     // calculate total price based on seat prices and number of passengers
-    Float total = calculateTotal(flights, numPassengers);
+    Bill bill = calculateTotal(flights, numPassengers);
 
     // attempt to charge card for total price and save payment id
     String paymentId = "";
     try {
       paymentId =
-        stripeService.chargeCreditCard(baseBookingDto.getStripeToken(), total);
+        stripeService.chargeCreditCard(
+          baseBookingDto.getStripeToken(),
+          bill.getTotal()
+        );
     } catch (Exception e) {
       throw new PaymentProcessingFailedException();
     }
@@ -176,26 +185,35 @@ public class BookingService {
     booking.setPassengers(passengers);
     // update the booking
     bookingDao.save(booking);
-
-    return booking;
+    bill.setBooking(booking);
+    return bill;
   }
 
   @Transactional
   public Booking createGuestBooking(
     CreateGuestBookingDto createGuestBookingDto
   ) {
-    Booking booking = createBooking(createGuestBookingDto);
+    Bill bill = createBooking(createGuestBookingDto);
+    Booking booking = bill.getBooking();
     BookingGuest bookingGuest = new BookingGuest();
     bookingGuest.setBookingId(booking.getId());
     bookingGuest.setContactEmail(createGuestBookingDto.getGuestEmail());
     bookingGuest.setContactPhone(createGuestBookingDto.getGuestPhone());
     bookingGuestDao.save(bookingGuest);
+    emailBill(
+      bill,
+      createGuestBookingDto.getGuestEmail(),
+      booking.getConfirmationCode(),
+      "",
+      ""
+    );
     return bookingDao.findById(booking.getId()).get();
   }
 
   @Transactional
   public Booking createUserBooking(CreateUserBookingDto createUserBookingDto) {
-    Booking booking = createBooking(createUserBookingDto);
+    Bill bill = createBooking(createUserBookingDto);
+    Booking booking = bill.getBooking();
     BookingUser bookingUser = new BookingUser();
     User user = userDao
       .findById(createUserBookingDto.getUserId())
@@ -203,6 +221,13 @@ public class BookingService {
     bookingUser.setUser(user);
     bookingUser.setBookingId(booking.getId());
     bookingUserDao.save(bookingUser);
+    emailBill(
+      bill,
+      user.getEmail(),
+      booking.getConfirmationCode(),
+      user.getGivenName(),
+      user.getFamilyName()
+    );
     return bookingDao.findById(booking.getId()).get();
   }
 
@@ -210,7 +235,8 @@ public class BookingService {
   public Booking createAgentBooking(
     CreateAgentBookingDto createAgentBookingDto
   ) {
-    Booking booking = createBooking(createAgentBookingDto);
+    Bill bill = createBooking(createAgentBookingDto);
+    Booking booking = bill.getBooking();
     BookingAgent bookingAgent = new BookingAgent();
     User user = userDao
       .findById(createAgentBookingDto.getAgentId())
@@ -221,16 +247,32 @@ public class BookingService {
     return bookingDao.findById(booking.getId()).get();
   }
 
-  private Float calculateTotal(Set<Flight> flights, int passengerCount) {
+  private void emailBill(
+    Bill bill,
+    String email,
+    String confirmationCode,
+    String givenName,
+    String familyName
+  ) {
+    BillingMailModel model = new BillingMailModel();
+    model.setTotalAmount(bill.getFormattedTotal());
+    model.setItems(bill.getLineItems());
+    model.setGivenName(givenName);
+    model.setFamilyName(familyName);
+    model.setConfirmationCode(confirmationCode);
+    emailService.send(email, EmailService.MailTemplate.BILLING, model);
+  }
+
+  private Bill calculateTotal(Set<Flight> flights, int passengerCount) {
+    Bill bill = new Bill();
     // loop through each flight
-    float subtotal = 0f;
     for (Flight flight : flights) {
-      // get the flight seat price, multiply it by the num of passengers and add it to the counter
-      subtotal += flight.getSeatPrice() * passengerCount;
+      // add the flight to the bill
+      bill.addLineItem(flight, passengerCount);
     }
-    // calculate sales tax
-    float tax = 0.0825f * subtotal;
-    // return grand total
-    return subtotal + tax;
+    // add sales tax to the bill
+    bill.addTaxLineItem(0.0825f);
+    // return bill
+    return bill;
   }
 }

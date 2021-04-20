@@ -1,7 +1,6 @@
 package com.smoothstack.utopia.ticketpaymentservice.controller;
 
-import com.smoothstack.utopia.shared.mailmodels.BookingConfirmationMailModel;
-import com.smoothstack.utopia.shared.mailmodels.SampleMailModel;
+import com.smoothstack.utopia.shared.mailmodels.BillingMailModel;
 import com.smoothstack.utopia.shared.model.Booking;
 import com.smoothstack.utopia.shared.service.EmailService;
 import com.smoothstack.utopia.ticketpaymentservice.dto.CreateAgentBookingDto;
@@ -9,8 +8,10 @@ import com.smoothstack.utopia.ticketpaymentservice.dto.CreateGuestBookingDto;
 import com.smoothstack.utopia.ticketpaymentservice.dto.CreateUserBookingDto;
 import com.smoothstack.utopia.ticketpaymentservice.service.BookingService;
 import java.util.List;
+import java.util.UUID;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -63,18 +64,6 @@ public class BookingController {
     @PathVariable("confirmationCode") String confirmationCode
   ) {
     return bookingService.getBookingByConfirmationCode(confirmationCode);
-  }
-
-  @GetMapping(path = "test")
-  public String test() {
-    BookingConfirmationMailModel sampleModel = new BookingConfirmationMailModel();
-    sampleModel.setRecipientName("Rob");
-    this.emailService.send(
-        "remilmaes@gmail.com",
-        EmailService.MailTemplate.BOOKING_CONFIRMATION,
-        sampleModel
-      );
-    return "hello";
   }
 
   @PostMapping(path = "/guest")
