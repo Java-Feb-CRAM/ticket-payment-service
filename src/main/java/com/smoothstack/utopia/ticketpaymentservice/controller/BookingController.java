@@ -6,6 +6,7 @@ import com.smoothstack.utopia.ticketpaymentservice.dto.CreateGuestBookingDto;
 import com.smoothstack.utopia.ticketpaymentservice.dto.CreateUserBookingDto;
 import com.smoothstack.utopia.ticketpaymentservice.service.BookingService;
 import java.util.List;
+import java.util.Optional;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -64,7 +65,7 @@ public class BookingController {
 
   @PostMapping(path = "/guest")
   @ResponseStatus(HttpStatus.CREATED)
-  public Booking createGuestBooking(
+  public Optional<Booking> createGuestBooking(
     @Valid @RequestBody CreateGuestBookingDto createGuestBookingDto
   ) {
     return bookingService.createGuestBooking(createGuestBookingDto);
@@ -72,7 +73,7 @@ public class BookingController {
 
   @PostMapping(path = "/user")
   @ResponseStatus(HttpStatus.CREATED)
-  public Booking createUserBooking(
+  public Optional<Booking> createUserBooking(
     @Valid @RequestBody CreateUserBookingDto createUserBookingDto
   ) {
     return bookingService.createUserBooking(createUserBookingDto);
@@ -80,7 +81,7 @@ public class BookingController {
 
   @PostMapping(path = "/agent")
   @ResponseStatus(HttpStatus.CREATED)
-  public Booking createAgentBooking(
+  public Optional<Booking> createAgentBooking(
     @Valid @RequestBody CreateAgentBookingDto createAgentBookingDto
   ) {
     return bookingService.createAgentBooking(createAgentBookingDto);

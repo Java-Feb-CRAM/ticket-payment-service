@@ -30,6 +30,7 @@ import com.smoothstack.utopia.ticketpaymentservice.exception.UserNotFoundExcepti
 import com.smoothstack.utopia.ticketpaymentservice.payment.Bill;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import javax.transaction.Transactional;
@@ -212,7 +213,7 @@ public class BookingService {
   }
 
   @Transactional
-  public Booking createGuestBooking(
+  public Optional<Booking> createGuestBooking(
     CreateGuestBookingDto createGuestBookingDto
   ) {
     Bill bill = createBooking(createGuestBookingDto);
@@ -229,11 +230,13 @@ public class BookingService {
       "",
       ""
     );
-    return bookingDao.findById(booking.getId()).get();
+    return bookingDao.findById(booking.getId());
   }
 
   @Transactional
-  public Booking createUserBooking(CreateUserBookingDto createUserBookingDto) {
+  public Optional<Booking> createUserBooking(
+    CreateUserBookingDto createUserBookingDto
+  ) {
     Bill bill = createBooking(createUserBookingDto);
     Booking booking = bill.getBooking();
     BookingUser bookingUser = new BookingUser();
@@ -250,11 +253,11 @@ public class BookingService {
       user.getGivenName(),
       user.getFamilyName()
     );
-    return bookingDao.findById(booking.getId()).get();
+    return bookingDao.findById(booking.getId());
   }
 
   @Transactional
-  public Booking createAgentBooking(
+  public Optional<Booking> createAgentBooking(
     CreateAgentBookingDto createAgentBookingDto
   ) {
     Bill bill = createBooking(createAgentBookingDto);
@@ -266,7 +269,7 @@ public class BookingService {
     bookingAgent.setAgent(user);
     bookingAgent.setBookingId(booking.getId());
     bookingAgentDao.save(bookingAgent);
-    return bookingDao.findById(booking.getId()).get();
+    return bookingDao.findById(booking.getId());
   }
 
   private void emailBill(

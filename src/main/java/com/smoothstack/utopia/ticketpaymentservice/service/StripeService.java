@@ -57,6 +57,6 @@ public class StripeService {
     Map<String, Object> params = new HashMap<>();
     params.put("charge", chargeId);
     params.put("reason", "requested_by_customer");
-    Refund refund = paymentProvider.createRefund(params);
+    paymentProvider.createRefund(params);
   }
 }
