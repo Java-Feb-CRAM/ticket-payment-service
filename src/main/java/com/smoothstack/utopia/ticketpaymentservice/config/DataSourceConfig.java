@@ -1,4 +1,4 @@
-package com.smoothstack.utopia.ticketpaymentservice;
+package com.smoothstack.utopia.ticketpaymentservice.config;
 
 import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Value;
