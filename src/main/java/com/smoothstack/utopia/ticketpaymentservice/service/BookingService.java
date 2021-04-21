@@ -10,7 +10,6 @@ import com.smoothstack.utopia.shared.model.Flight;
 import com.smoothstack.utopia.shared.model.Passenger;
 import com.smoothstack.utopia.shared.model.User;
 import com.smoothstack.utopia.shared.service.EmailService;
-import com.smoothstack.utopia.ticketpaymentservice.Bill;
 import com.smoothstack.utopia.ticketpaymentservice.dao.BookingAgentDao;
 import com.smoothstack.utopia.ticketpaymentservice.dao.BookingDao;
 import com.smoothstack.utopia.ticketpaymentservice.dao.BookingGuestDao;
@@ -28,6 +27,7 @@ import com.smoothstack.utopia.ticketpaymentservice.exception.FlightFullException
 import com.smoothstack.utopia.ticketpaymentservice.exception.FlightNotFoundException;
 import com.smoothstack.utopia.ticketpaymentservice.exception.PaymentProcessingFailedException;
 import com.smoothstack.utopia.ticketpaymentservice.exception.UserNotFoundException;
+import com.smoothstack.utopia.ticketpaymentservice.payment.Bill;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;

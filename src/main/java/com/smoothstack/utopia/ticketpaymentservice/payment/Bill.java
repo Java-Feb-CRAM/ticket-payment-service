@@ -1,4 +1,4 @@
-package com.smoothstack.utopia.ticketpaymentservice;
+package com.smoothstack.utopia.ticketpaymentservice.payment;
 
 import com.smoothstack.utopia.shared.model.Booking;
 import com.smoothstack.utopia.shared.model.Flight;
