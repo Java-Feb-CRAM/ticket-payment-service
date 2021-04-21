@@ -2,7 +2,6 @@ package com.smoothstack.utopia.ticketpaymentservice.dao;
 
 import com.smoothstack.utopia.shared.model.Booking;
 import com.smoothstack.utopia.shared.model.User;
-import java.awt.print.Book;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;

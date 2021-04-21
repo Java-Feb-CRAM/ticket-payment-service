@@ -1,21 +1,10 @@
 package com.smoothstack.utopia.ticketpaymentservice.service;
 
 import com.smoothstack.utopia.ticketpaymentservice.dto.PaymentInfoDto;
-import com.stripe.Stripe;
-import com.stripe.model.Charge;
-import com.stripe.net.RequestOptions;
-import java.util.HashMap;
-import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
