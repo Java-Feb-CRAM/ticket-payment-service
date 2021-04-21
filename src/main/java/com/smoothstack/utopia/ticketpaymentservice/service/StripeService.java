@@ -34,12 +34,6 @@ public class StripeService {
   }
 
   public PaymentInfoDto getPaymentInfo(String stripeId) {
-    //    Charge charge;
-    //    try {
-    //      charge = Charge.retrieve(stripeId);
-    //    } catch (Exception e) {
-    //      throw new PaymentNotFoundException();
-    //    }
     Charge charge = paymentProvider.retrieveCharge(stripeId);
     PaymentInfoDto paymentInfo = new PaymentInfoDto();
     paymentInfo.setAmount(charge.getAmount());
@@ -57,34 +51,16 @@ public class StripeService {
     chargeParams.put("amount", (int) (amount * 100));
     chargeParams.put("currency", "USD");
     chargeParams.put("source", token);
-    //    Charge charge = Charge.create(chargeParams);
     Charge charge = paymentProvider.createCharge(chargeParams);
     return charge.getId();
   }
 
   public void refundCharge(String stripeId) {
-    //    Charge charge;
-    //    try {
-    //      charge = Charge.retrieve(stripeId);
-    //    } catch (Exception e) {
-    //      throw new PaymentNotFoundException();
-    //    }
     Charge charge = paymentProvider.retrieveCharge(stripeId);
     String chargeId = charge.getId();
     Map<String, Object> params = new HashMap<>();
     params.put("charge", chargeId);
     params.put("reason", "requested_by_customer");
-    //    try {
-    //      Refund refund = Refund.create(params);
-    //    } catch (
-    //      AuthenticationException
-    //      | InvalidRequestException
-    //      | APIConnectionException
-    //      | APIException
-    //      | CardException e
-    //    ) {
-    //      throw new PaymentRefundException();
-    //    }
     Refund refund = paymentProvider.createRefund(params);
   }
 }
