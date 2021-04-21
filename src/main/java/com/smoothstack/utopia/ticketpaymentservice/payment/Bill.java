@@ -3,7 +3,6 @@ package com.smoothstack.utopia.ticketpaymentservice.payment;
 import com.smoothstack.utopia.shared.model.Booking;
 import com.smoothstack.utopia.shared.model.Flight;
 import java.text.DecimalFormat;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import lombok.AllArgsConstructor;

@@ -1,10 +1,7 @@
 package com.smoothstack.utopia.ticketpaymentservice.service;
 
 import com.smoothstack.utopia.ticketpaymentservice.dto.PaymentInfoDto;
-import com.smoothstack.utopia.ticketpaymentservice.exception.PaymentNotFoundException;
-import com.smoothstack.utopia.ticketpaymentservice.exception.PaymentRefundException;
 import com.smoothstack.utopia.ticketpaymentservice.payment.PaymentProvider;
-import com.stripe.Stripe;
 import com.stripe.exception.APIConnectionException;
 import com.stripe.exception.APIException;
 import com.stripe.exception.AuthenticationException;
@@ -16,7 +13,6 @@ import com.stripe.model.Refund;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**

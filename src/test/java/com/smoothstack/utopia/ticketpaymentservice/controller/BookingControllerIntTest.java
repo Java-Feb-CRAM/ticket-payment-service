@@ -9,7 +9,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.xpath;
 
-import com.smoothstack.utopia.shared.mailmodels.BaseMailModel;
 import com.smoothstack.utopia.shared.model.Airplane;
 import com.smoothstack.utopia.shared.model.AirplaneType;
 import com.smoothstack.utopia.shared.model.Airport;
