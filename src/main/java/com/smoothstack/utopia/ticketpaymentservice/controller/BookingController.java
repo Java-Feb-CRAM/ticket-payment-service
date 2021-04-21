@@ -1,13 +1,20 @@
 package com.smoothstack.utopia.ticketpaymentservice.controller;
 
+import com.smoothstack.utopia.shared.mailmodels.BillingMailModel;
 import com.smoothstack.utopia.shared.model.Booking;
+import com.smoothstack.utopia.shared.service.EmailService;
+import com.smoothstack.utopia.ticketpaymentservice.dto.CreateAgentBookingDto;
 import com.smoothstack.utopia.ticketpaymentservice.dto.CreateGuestBookingDto;
+import com.smoothstack.utopia.ticketpaymentservice.dto.CreateUserBookingDto;
 import com.smoothstack.utopia.ticketpaymentservice.service.BookingService;
 import java.util.List;
+import java.util.UUID;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -54,11 +61,38 @@ public class BookingController {
     return bookingService.getBookingByConfirmationCode(confirmationCode);
   }
 
+  @GetMapping(path = "/user/{userId}")
+  public List<Booking> getBookingsByUser(@PathVariable("userId") Long userId) {
+    return bookingService.getBookingsByUser(userId);
+  }
+
   @PostMapping(path = "/guest")
   @ResponseStatus(HttpStatus.CREATED)
   public Booking createGuestBooking(
     @Valid @RequestBody CreateGuestBookingDto createGuestBookingDto
   ) {
     return bookingService.createGuestBooking(createGuestBookingDto);
+  }
+
+  @PostMapping(path = "/user")
+  @ResponseStatus(HttpStatus.CREATED)
+  public Booking createUserBooking(
+    @Valid @RequestBody CreateUserBookingDto createUserBookingDto
+  ) {
+    return bookingService.createUserBooking(createUserBookingDto);
+  }
+
+  @PostMapping(path = "/agent")
+  @ResponseStatus(HttpStatus.CREATED)
+  public Booking createAgentBooking(
+    @Valid @RequestBody CreateAgentBookingDto createAgentBookingDto
+  ) {
+    return bookingService.createAgentBooking(createAgentBookingDto);
+  }
+
+  @DeleteMapping(path = "{bookingId}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public void cancelBooking(@PathVariable("bookingId") Long bookingId) {
+    bookingService.cancelBooking(bookingId);
   }
 }

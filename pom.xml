@@ -86,7 +86,7 @@
     <dependency>
       <groupId>com.smoothstack.utopia</groupId>
       <artifactId>shared</artifactId>
-      <version>2.2-SNAPSHOT</version>
+      <version>2.9-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.springdoc</groupId>
@@ -100,8 +100,8 @@
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
-      <artifactId>mockito-core</artifactId>
-      <version>2.21.0</version>
+      <artifactId>mockito-inline</artifactId>
+      <version>3.4.0</version>
     </dependency>
   </dependencies>
   <dependencyManagement>
