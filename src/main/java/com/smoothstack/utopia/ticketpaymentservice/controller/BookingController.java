@@ -4,6 +4,7 @@ import com.smoothstack.utopia.shared.model.Booking;
 import com.smoothstack.utopia.ticketpaymentservice.dto.CreateAgentBookingDto;
 import com.smoothstack.utopia.ticketpaymentservice.dto.CreateGuestBookingDto;
 import com.smoothstack.utopia.ticketpaymentservice.dto.CreateUserBookingDto;
+import com.smoothstack.utopia.ticketpaymentservice.dto.UpdateBookingDto;
 import com.smoothstack.utopia.ticketpaymentservice.service.BookingService;
 import java.util.List;
 import java.util.Optional;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -85,6 +87,15 @@ public class BookingController {
     @Valid @RequestBody CreateAgentBookingDto createAgentBookingDto
   ) {
     return bookingService.createAgentBooking(createAgentBookingDto);
+  }
+
+  @PutMapping(path = "{bookingId}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public void updateBooking(
+    @PathVariable("bookingId") Long bookingId,
+    @Valid @RequestBody UpdateBookingDto updateBookingDto
+  ) {
+    bookingService.updateBooking(bookingId, updateBookingDto);
   }
 
   @DeleteMapping(path = "{bookingId}")
