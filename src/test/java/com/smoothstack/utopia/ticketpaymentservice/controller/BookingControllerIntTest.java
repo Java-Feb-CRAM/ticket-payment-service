@@ -23,6 +23,7 @@ import com.smoothstack.utopia.shared.model.Route;
 import com.smoothstack.utopia.shared.model.User;
 import com.smoothstack.utopia.shared.model.UserRole;
 import com.smoothstack.utopia.shared.service.EmailService;
+import com.smoothstack.utopia.shared.service.SmsService;
 import com.smoothstack.utopia.ticketpaymentservice.Utils;
 import com.smoothstack.utopia.ticketpaymentservice.dao.AirplaneDao;
 import com.smoothstack.utopia.ticketpaymentservice.dao.AirplaneTypeDao;
@@ -57,6 +58,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -88,6 +90,9 @@ class BookingControllerIntTest {
 
   @MockBean
   private EmailService emailService;
+
+  @MockBean
+  private SmsService smsService;
 
   @Autowired
   private BookingGuestDao bookingGuestDao;
@@ -458,6 +463,10 @@ class BookingControllerIntTest {
       .doNothing()
       .when(emailService)
       .send(Mockito.anyString(), Mockito.any(), Mockito.any());
+    Mockito
+      .doNothing()
+      .when(smsService)
+      .send(Mockito.anyString(), Mockito.anyString());
 
     mvc
       .perform(
@@ -631,6 +640,10 @@ class BookingControllerIntTest {
       .doNothing()
       .when(emailService)
       .send(Mockito.anyString(), Mockito.any(), Mockito.any());
+    Mockito
+      .doNothing()
+      .when(smsService)
+      .send(Mockito.anyString(), Mockito.anyString());
 
     mvc
       .perform(
@@ -717,6 +730,10 @@ class BookingControllerIntTest {
       .doNothing()
       .when(emailService)
       .send(Mockito.anyString(), Mockito.any(), Mockito.any());
+    Mockito
+      .doNothing()
+      .when(smsService)
+      .send(Mockito.anyString(), Mockito.anyString());
 
     mvc
       .perform(
