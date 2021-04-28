@@ -11,6 +11,4 @@ import org.springframework.web.bind.annotation.ResponseStatus;
   value = HttpStatus.NOT_FOUND,
   reason = "The requested booking does not exist"
 )
-public class BookingNotFoundException extends RuntimeException  {
-
-}
+public class BookingNotFoundException extends RuntimeException {}
