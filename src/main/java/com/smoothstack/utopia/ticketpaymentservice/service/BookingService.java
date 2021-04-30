@@ -10,6 +10,7 @@ import com.smoothstack.utopia.shared.model.Flight;
 import com.smoothstack.utopia.shared.model.Passenger;
 import com.smoothstack.utopia.shared.model.User;
 import com.smoothstack.utopia.shared.service.EmailService;
+import com.smoothstack.utopia.shared.service.SmsService;
 import com.smoothstack.utopia.ticketpaymentservice.dao.BookingAgentDao;
 import com.smoothstack.utopia.ticketpaymentservice.dao.BookingDao;
 import com.smoothstack.utopia.ticketpaymentservice.dao.BookingGuestDao;
@@ -46,6 +47,7 @@ public class BookingService {
 
   private final StripeService stripeService;
   private final EmailService emailService;
+  private final SmsService smsService;
   private final BookingDao bookingDao;
   private final FlightDao flightDao;
   private final PassengerDao passengerDao;
@@ -59,6 +61,7 @@ public class BookingService {
   public BookingService(
     StripeService stripeService,
     EmailService emailService,
+    SmsService smsService,
     BookingDao bookingDao,
     FlightDao flightDao,
     PassengerDao passengerDao,
@@ -70,6 +73,7 @@ public class BookingService {
   ) {
     this.stripeService = stripeService;
     this.emailService = emailService;
+    this.smsService = smsService;
     this.bookingDao = bookingDao;
     this.flightDao = flightDao;
     this.passengerDao = passengerDao;
@@ -230,6 +234,10 @@ public class BookingService {
       "",
       ""
     );
+    smsService.send(
+      createGuestBookingDto.getGuestPhone(),
+      "Booking " + booking.getConfirmationCode() + " is confirmed."
+    );
     return bookingDao.findById(booking.getId());
   }
 
@@ -252,6 +260,10 @@ public class BookingService {
       booking.getConfirmationCode(),
       user.getGivenName(),
       user.getFamilyName()
+    );
+    smsService.send(
+      user.getPhone(),
+      "Booking " + booking.getConfirmationCode() + " is confirmed."
     );
     return bookingDao.findById(booking.getId());
   }
