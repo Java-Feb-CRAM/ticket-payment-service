@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -42,6 +43,7 @@ import com.smoothstack.utopia.ticketpaymentservice.dto.CreateAgentBookingDto;
 import com.smoothstack.utopia.ticketpaymentservice.dto.CreateGuestBookingDto;
 import com.smoothstack.utopia.ticketpaymentservice.dto.CreatePassengerDto;
 import com.smoothstack.utopia.ticketpaymentservice.dto.CreateUserBookingDto;
+import com.smoothstack.utopia.ticketpaymentservice.dto.UpdateBookingDto;
 import com.smoothstack.utopia.ticketpaymentservice.exception.BookingNotFoundException;
 import com.smoothstack.utopia.ticketpaymentservice.exception.FlightFullException;
 import com.smoothstack.utopia.ticketpaymentservice.exception.FlightNotFoundException;
@@ -52,7 +54,9 @@ import com.smoothstack.utopia.ticketpaymentservice.service.StripeService;
 import com.stripe.exception.CardException;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.Assertions;
@@ -794,6 +798,76 @@ class BookingControllerIntTest {
           Assertions.assertTrue(
             result.getResolvedException() instanceof UserNotFoundException
           )
+      );
+  }
+
+  /*
+    PUT Tests
+   */
+  @Test
+  void canUpdateBooking_whenPutBookingWithValidData_thenStatus204()
+    throws Exception {
+    Booking booking = createGuestBooking(Set.of(flightLAXtoSFO));
+    UpdateBookingDto updateBookingDto = new UpdateBookingDto();
+    Passenger passenger = new Passenger();
+    for (Passenger p : booking.getPassengers()) {
+      passenger = p;
+    }
+    Map<Long, CreatePassengerDto> passengerMap = new LinkedHashMap<>();
+    CreatePassengerDto createPassengerDto = new CreatePassengerDto();
+    createPassengerDto.setGender("Male");
+    createPassengerDto.setGivenName("Rob");
+    createPassengerDto.setFamilyName("Maes");
+    createPassengerDto.setAddress("Texas");
+    createPassengerDto.setDob(LocalDate.of(1996, 10, 8));
+    passengerMap.put(passenger.getId(), createPassengerDto);
+    updateBookingDto.setPassengers(passengerMap);
+    Passenger finalPassenger = passenger;
+    mvc
+      .perform(
+        put("/bookings/{id}", booking.getId())
+          .content(Utils.asJsonString(updateBookingDto))
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON)
+      )
+      .andExpect(status().isNoContent())
+      .andExpect(
+        result -> {
+          Passenger passenger2 = passengerDao
+            .findById(finalPassenger.getId())
+            .orElseThrow();
+          Assertions.assertEquals("Rob", passenger2.getGivenName());
+        }
+      );
+  }
+
+  @Test
+  void cannotUpdateBooking_whenPutBookingWithInvalidId_thenStatus404()
+    throws Exception {
+    UpdateBookingDto updateBookingDto = new UpdateBookingDto();
+    Map<Long, CreatePassengerDto> createPassengerDtoMap = new LinkedHashMap<>();
+    CreatePassengerDto createPassengerDto = new CreatePassengerDto();
+    createPassengerDto.setDob(LocalDate.of(1996, 10, 8));
+    createPassengerDto.setAddress("Texas");
+    createPassengerDto.setGender("Male");
+    createPassengerDto.setFamilyName("Maes");
+    createPassengerDto.setGivenName("Rob");
+    createPassengerDtoMap.put(25L, createPassengerDto);
+    updateBookingDto.setPassengers(createPassengerDtoMap);
+    mvc
+      .perform(
+        put("/bookings/{id}", 432L)
+          .content(Utils.asJsonString(updateBookingDto))
+          .contentType(MediaType.APPLICATION_JSON)
+          .accept(MediaType.APPLICATION_JSON)
+      )
+      .andExpect(status().isNotFound())
+      .andExpect(
+        result -> {
+          Assertions.assertTrue(
+            result.getResolvedException() instanceof BookingNotFoundException
+          );
+        }
       );
   }
 

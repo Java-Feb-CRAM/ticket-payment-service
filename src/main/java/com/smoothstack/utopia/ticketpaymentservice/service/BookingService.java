@@ -23,9 +23,11 @@ import com.smoothstack.utopia.ticketpaymentservice.dto.BaseBookingDto;
 import com.smoothstack.utopia.ticketpaymentservice.dto.CreateAgentBookingDto;
 import com.smoothstack.utopia.ticketpaymentservice.dto.CreateGuestBookingDto;
 import com.smoothstack.utopia.ticketpaymentservice.dto.CreateUserBookingDto;
+import com.smoothstack.utopia.ticketpaymentservice.dto.UpdateBookingDto;
 import com.smoothstack.utopia.ticketpaymentservice.exception.BookingNotFoundException;
 import com.smoothstack.utopia.ticketpaymentservice.exception.FlightFullException;
 import com.smoothstack.utopia.ticketpaymentservice.exception.FlightNotFoundException;
+import com.smoothstack.utopia.ticketpaymentservice.exception.PassengerNotFoundException;
 import com.smoothstack.utopia.ticketpaymentservice.exception.PaymentProcessingFailedException;
 import com.smoothstack.utopia.ticketpaymentservice.exception.UserNotFoundException;
 import com.smoothstack.utopia.ticketpaymentservice.payment.Bill;
@@ -34,6 +36,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -282,6 +285,35 @@ public class BookingService {
     bookingAgent.setBookingId(booking.getId());
     bookingAgentDao.save(bookingAgent);
     return bookingDao.findById(booking.getId());
+  }
+
+  @Transactional
+  public void updateBooking(Long bookingId, UpdateBookingDto updateBookingDto) {
+    Booking booking = bookingDao
+      .findById(bookingId)
+      .orElseThrow(BookingNotFoundException::new);
+    List<Long> passengerIds = booking
+      .getPassengers()
+      .stream()
+      .map(Passenger::getId)
+      .collect(Collectors.toList());
+    updateBookingDto
+      .getPassengers()
+      .forEach(
+        (id, updatePassenger) -> {
+          if (passengerIds.contains(id)) {
+            Passenger original = passengerDao
+              .findById(id)
+              .orElseThrow(PassengerNotFoundException::new);
+            original.setGender(updatePassenger.getGender());
+            original.setFamilyName(updatePassenger.getFamilyName());
+            original.setGivenName(updatePassenger.getGivenName());
+            original.setDob(updatePassenger.getDob());
+            original.setAddress(updatePassenger.getAddress());
+            passengerDao.save(original);
+          }
+        }
+      );
   }
 
   private void emailBill(
