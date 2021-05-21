@@ -22,6 +22,7 @@ import com.smoothstack.utopia.ticketpaymentservice.dao.UserDao;
 import com.smoothstack.utopia.ticketpaymentservice.dto.BaseBookingDto;
 import com.smoothstack.utopia.ticketpaymentservice.dto.CreateAgentBookingDto;
 import com.smoothstack.utopia.ticketpaymentservice.dto.CreateGuestBookingDto;
+import com.smoothstack.utopia.ticketpaymentservice.dto.CreatePassengerDto;
 import com.smoothstack.utopia.ticketpaymentservice.dto.CreateUserBookingDto;
 import com.smoothstack.utopia.ticketpaymentservice.dto.UpdateBookingDto;
 import com.smoothstack.utopia.ticketpaymentservice.exception.BookingNotFoundException;
@@ -31,6 +32,7 @@ import com.smoothstack.utopia.ticketpaymentservice.exception.PassengerNotFoundEx
 import com.smoothstack.utopia.ticketpaymentservice.exception.PaymentProcessingFailedException;
 import com.smoothstack.utopia.ticketpaymentservice.exception.UserNotFoundException;
 import com.smoothstack.utopia.ticketpaymentservice.payment.Bill;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -147,8 +149,14 @@ public class BookingService {
         }
       );
 
+    List<LocalDate> passengerDobs = baseBookingDto
+      .getPassengers()
+      .stream()
+      .map(CreatePassengerDto::getDob)
+      .collect(Collectors.toList());
+
     // calculate total price based on seat prices and number of passengers
-    Bill bill = calculateTotal(flights, numPassengers);
+    Bill bill = calculateTotal(flights, passengerDobs);
 
     // attempt to charge card for total price and save payment id
     String paymentId = "";
@@ -332,12 +340,15 @@ public class BookingService {
     emailService.send(email, EmailService.MailTemplate.BILLING, model);
   }
 
-  private Bill calculateTotal(Set<Flight> flights, int passengerCount) {
+  private Bill calculateTotal(
+    Set<Flight> flights,
+    List<LocalDate> passengerDobs
+  ) {
     Bill bill = new Bill();
     // loop through each flight
     for (Flight flight : flights) {
       // add the flight to the bill
-      bill.addLineItem(flight, passengerCount);
+      bill.addLineItem(flight, passengerDobs);
     }
     // add sales tax to the bill
     bill.addTaxLineItem(0.0825f);
